@@ -8,8 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,8 +36,22 @@ fun DetailsScreen(
 ) = Column(Modifier.fillMaxSize()) {
 
     var fontSize by remember { mutableStateOf(20f) }
+    var isFavorite by remember { mutableStateOf(false) }
 
-    Toolbar(onNavigateBack = onNavigateBack, title = hymn.title)
+    Toolbar(
+        title = hymn.title,
+        onNavigateBack = onNavigateBack,
+        rightIcons = {
+            IconButton(onClick = {
+                isFavorite = !isFavorite
+            }) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                    contentDescription = "Favorites",
+                )
+            }
+        }
+    )
 
     val zoomableModifier = Modifier.pointerInput(Unit) {
         detectTransformGestures { _, _, zoom, _ ->
@@ -41,8 +60,7 @@ fun DetailsScreen(
     }
 
     Surface(
-        modifier = zoomableModifier
-            .fillMaxSize()
+        modifier = zoomableModifier.fillMaxSize()
     ) {
 
         Column(

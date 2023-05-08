@@ -12,9 +12,9 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -30,17 +30,19 @@ fun DetailsScreen(
     onNavigateBack: () -> Unit
 ) = Column(Modifier.fillMaxSize()) {
 
-    var zoomSize by remember { mutableStateOf(0f) }
+    var fontSize by remember { mutableStateOf(20f) }
 
     Toolbar(onNavigateBack = onNavigateBack, title = hymn.title)
 
+    val zoomableModifier = Modifier.pointerInput(Unit) {
+        detectTransformGestures { _, _, zoom, _ ->
+            fontSize *= zoom
+        }
+    }
+
     Surface(
-        modifier = Modifier
-            .pointerInput(Unit) {
-                detectTransformGestures { centroid, pan, zoom, rotation ->
-                    println("Detected gesture: $centroid, $pan, $zoom, $rotation")
-                }
-            }
+        modifier = zoomableModifier
+            .fillMaxSize()
     ) {
 
         Column(
@@ -52,8 +54,8 @@ fun DetailsScreen(
 
             Text(
                 text = hymn.stanzas.joinToString("\n\n\n"),
-                fontSize = 20.sp,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                fontSize = fontSize.sp,
+                modifier = zoomableModifier.align(alignment = Alignment.CenterHorizontally)
             )
 
             Spacer(modifier = Modifier.fillMaxWidth().height(40.dp))

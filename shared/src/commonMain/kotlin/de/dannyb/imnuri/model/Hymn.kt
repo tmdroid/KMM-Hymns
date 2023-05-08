@@ -1,4 +1,4 @@
-package model
+package de.dannyb.imnuri.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

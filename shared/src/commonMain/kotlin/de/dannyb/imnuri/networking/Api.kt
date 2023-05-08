@@ -1,15 +1,15 @@
 package de.dannyb.imnuri.networking
 
+import de.dannyb.imnuri.model.Hymn
+import de.dannyb.imnuri.model.Hymns
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import model.Hymn
-import model.Hymns
 
 class Api {
 
@@ -20,6 +20,7 @@ class Api {
     }
     private val httpClient = HttpClient {
         install(ContentNegotiation) { json(formatter) }
+        install(HttpCache)
         install(Logging)
     }
 

@@ -1,4 +1,4 @@
-package de.dannyb.imnuri.networking.screens.home
+package de.dannyb.imnuri.ui.screens.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,40 +23,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import de.dannyb.imnuri.networking.Api
-import model.Hymn
+import de.dannyb.imnuri.model.Hymn
+import de.dannyb.imnuri.ui.common.components.Toolbar
 
 @Composable
-fun HomeScreen(api: Api) = Column(Modifier.fillMaxSize()) {
-
+fun HomeScreen(
+    api: Api,
+    onHymnSelected: (Hymn) -> Unit
+) = Column(Modifier.fillMaxSize()) {
     Toolbar()
+    HymnsList(api, onHymnSelected)
+}
 
+@Composable
+fun HymnsList(api: Api, onHymnSelected: (Hymn) -> Unit) {
     var hymns by remember { mutableStateOf<List<Hymn>>(emptyList()) }
 
-    LaunchedEffect(true) {
-        try {
-            hymns = api.downloadHymns()
-        } catch (e: Exception) {
-            e.printStackTrace()
+    if(hymns.isEmpty()) {
+        LaunchedEffect(true) {
+            try {
+                hymns = api.downloadHymns()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         itemsIndexed(hymns) { index, item ->
-            ImnElement(index, item)
+            ImnElement(index, item, onHymnSelected)
         }
     }
 }
 
 @Composable
-fun Toolbar() {
-    TopAppBar(
-        title = { Text(text = "Imnuri AZS-MR") },
-        backgroundColor = Color.White
-    )
-}
-
-@Composable
-fun ImnElement(index: Int, item: Hymn) {
+fun ImnElement(index: Int, item: Hymn, onHymnSelected: (Hymn) -> Unit) {
     val content = "${index + 1}. ${item.title}"
 
     Divider(
@@ -68,7 +68,7 @@ fun ImnElement(index: Int, item: Hymn) {
     Card(modifier = Modifier
         .fillMaxWidth()
         .height(35.dp)
-        .clickable { println("Hymn ${item.number} has been clicked") }
+        .clickable { onHymnSelected(item) }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),

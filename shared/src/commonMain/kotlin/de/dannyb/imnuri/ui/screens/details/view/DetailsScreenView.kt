@@ -1,4 +1,4 @@
-package de.dannyb.imnuri.ui.screens.details
+package de.dannyb.imnuri.ui.screens.details.view
 
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -28,37 +28,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arkivanov.decompose.ComponentContext
 import de.dannyb.imnuri.model.Hymn
 import de.dannyb.imnuri.ui.common.components.Toolbar
+import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
 
-
-interface HymnDetailsComponent {
-    val hymn: Hymn
-    fun onFavoriteClicked(hymn: Hymn)
-    fun onBackClicked()
-}
-
-class DefaultHymnDetailsComponent(
-    private val componentContext: ComponentContext,
-    override val hymn: Hymn,
-    private val onFavoriteAction: (Hymn) -> Boolean,
-    private val onBackAction: () -> Unit,
-) : HymnDetailsComponent {
-
-    override fun onFavoriteClicked(hymn: Hymn) {
-        val result = onFavoriteAction.invoke(hymn)
-        println("Is favorite: $result")
-    }
-
-    override fun onBackClicked() {
-        onBackAction.invoke()
-    }
-}
 
 @Composable
 fun DetailsScreen(
-    component: HymnDetailsComponent,
+    component: DetailsScreenCtrl,
     onFavoriteAction: (Hymn) -> Boolean,
 ) = Column(Modifier.fillMaxSize()) {
 
@@ -69,7 +46,7 @@ fun DetailsScreen(
 }
 
 @Composable
-fun ShowZoomableHymn(component: HymnDetailsComponent) {
+fun ShowZoomableHymn(component: DetailsScreenCtrl) {
     val fontSize = remember { mutableStateOf(30f) }
 
     val zoomableModifier = Modifier.pointerInput(Unit) {
@@ -90,7 +67,7 @@ fun ShowZoomableHymn(component: HymnDetailsComponent) {
 
 @Composable
 fun ScrollableColumn(
-    component: HymnDetailsComponent,
+    component: DetailsScreenCtrl,
     fontSize: MutableState<Float>,
 ) {
     val scrollState = rememberScrollState()
@@ -117,7 +94,7 @@ fun ScrollableColumn(
 
 @Composable
 private fun DetailsToolbar(
-    component: HymnDetailsComponent,
+    component: DetailsScreenCtrl,
     isFavorite: Boolean,
     onFavoriteAction: (Hymn) -> Boolean
 ) {

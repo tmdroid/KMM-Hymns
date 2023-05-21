@@ -17,9 +17,9 @@ import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import de.dannyb.imnuri.model.Hymn
 import de.dannyb.imnuri.networking.Api
-import de.dannyb.imnuri.ui.screens.details.DefaultHymnDetailsComponent
-import de.dannyb.imnuri.ui.screens.details.DetailsScreen
-import de.dannyb.imnuri.ui.screens.details.HymnDetailsComponent
+import de.dannyb.imnuri.ui.screens.details.ctrl.DefaultDetailsScreenCtrl
+import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
+import de.dannyb.imnuri.ui.screens.details.view.DetailsScreen
 import de.dannyb.imnuri.ui.screens.home.DefaultHymnsListComponent
 import de.dannyb.imnuri.ui.screens.home.HomeScreen
 import de.dannyb.imnuri.ui.screens.home.HymnsListComponent
@@ -31,7 +31,7 @@ interface RootComponent {
 
     sealed class Child {
         class ListChild(val component: HymnsListComponent) : Child()
-        class DetailsChild(val component: HymnDetailsComponent) : Child()
+        class DetailsChild(val component: DetailsScreenCtrl) : Child()
     }
 }
 
@@ -74,8 +74,8 @@ class DefaultRootComponent(
     private fun itemDetails(
         componentContext: ComponentContext,
         config: Config.Details
-    ): HymnDetailsComponent =
-        DefaultHymnDetailsComponent(
+    ): DetailsScreenCtrl =
+        DefaultDetailsScreenCtrl(
             componentContext = componentContext,
             hymn = config.hymn,
             onFavoriteAction = { true },

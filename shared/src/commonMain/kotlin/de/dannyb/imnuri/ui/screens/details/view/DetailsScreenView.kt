@@ -34,7 +34,7 @@ import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
 
 
 @Composable
-fun DetailsScreen(
+fun DetailsScreenView(
     component: DetailsScreenCtrl,
     onFavoriteAction: (Hymn) -> Boolean,
 ) = Column(Modifier.fillMaxSize()) {

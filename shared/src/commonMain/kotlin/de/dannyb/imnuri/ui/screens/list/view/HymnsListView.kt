@@ -1,4 +1,4 @@
-package de.dannyb.imnuri.ui.screens.home
+package de.dannyb.imnuri.ui.screens.list.view
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,56 +18,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import com.arkivanov.decompose.value.MutableValue
-import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.update
 import de.dannyb.imnuri.model.Hymn
-import de.dannyb.imnuri.networking.Api
 import de.dannyb.imnuri.ui.common.components.Toolbar
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import de.dannyb.imnuri.ui.screens.list.ctrl.HymnsListCtrl
 
-interface HymnsListComponent {
-    val hymns: Value<List<Hymn>>
-    fun onHymnClicked(hymn: Hymn)
-}
-
-class DefaultHymnsListComponent(
-    componentContext: ComponentContext,
-    api: Api,
-    private val onHymnSelected: (Hymn) -> Unit
-) : HymnsListComponent, ComponentContext by componentContext {
-
-    private var _hymns = MutableValue(emptyList<Hymn>())
-
-    override val hymns: Value<List<Hymn>> get() = _hymns
-
-    init {
-        GlobalScope.launch {
-            val hymns = api.downloadHymns()
-            _hymns.update { hymns }
-        }
-    }
-
-    override fun onHymnClicked(hymn: Hymn) {
-        onHymnSelected.invoke(hymn)
-    }
-}
 
 @Composable
-fun HomeScreen(
-    component: HymnsListComponent,
+fun HymnsListScreenView(
+    ctrl: HymnsListCtrl,
     onHymnSelected: (Hymn) -> Unit
 ) = Column(Modifier.fillMaxSize()) {
     Toolbar()
-    HymnsList(component, onHymnSelected)
+    HymnsList(ctrl, onHymnSelected)
 }
 
 @Composable
-fun HymnsList(component: HymnsListComponent, onHymnSelected: (Hymn) -> Unit) {
-    val state by component.hymns.subscribeAsState()
+fun HymnsList(ctrl: HymnsListCtrl, onHymnSelected: (Hymn) -> Unit) {
+    val state by ctrl.hymns.subscribeAsState()
 
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         itemsIndexed(state) { index, item ->

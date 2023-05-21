@@ -19,10 +19,10 @@ import de.dannyb.imnuri.model.Hymn
 import de.dannyb.imnuri.networking.Api
 import de.dannyb.imnuri.ui.screens.details.ctrl.DefaultDetailsScreenCtrl
 import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
-import de.dannyb.imnuri.ui.screens.details.view.DetailsScreen
-import de.dannyb.imnuri.ui.screens.home.DefaultHymnsListComponent
-import de.dannyb.imnuri.ui.screens.home.HomeScreen
-import de.dannyb.imnuri.ui.screens.home.HymnsListComponent
+import de.dannyb.imnuri.ui.screens.details.view.DetailsScreenView
+import de.dannyb.imnuri.ui.screens.list.ctrl.DefaultHymnsListCtrl
+import de.dannyb.imnuri.ui.screens.list.ctrl.HymnsListCtrl
+import de.dannyb.imnuri.ui.screens.list.view.HymnsListScreenView
 
 
 interface RootComponent {
@@ -30,7 +30,7 @@ interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
 
     sealed class Child {
-        class ListChild(val component: HymnsListComponent) : Child()
+        class ListChild(val component: HymnsListCtrl) : Child()
         class DetailsChild(val component: DetailsScreenCtrl) : Child()
     }
 }
@@ -64,8 +64,8 @@ class DefaultRootComponent(
         }
     }
 
-    private fun itemList(componentContext: ComponentContext): HymnsListComponent =
-        DefaultHymnsListComponent(
+    private fun itemList(componentContext: ComponentContext): HymnsListCtrl =
+        DefaultHymnsListCtrl(
             componentContext = componentContext,
             api = api,
             onHymnSelected = { navigation.push(Config.Details(hymn = it)) }
@@ -100,12 +100,12 @@ fun RootContent(component: RootComponent, modifier: Modifier) {
         modifier = modifier.fillMaxSize(),
     ) {
         when (val child = it.instance) {
-            is RootComponent.Child.ListChild -> HomeScreen(
-                component = child.component,
+            is RootComponent.Child.ListChild -> HymnsListScreenView(
+                ctrl = child.component,
                 onHymnSelected = { hymn -> child.component.onHymnClicked(hymn) }
             )
 
-            is RootComponent.Child.DetailsChild -> DetailsScreen(
+            is RootComponent.Child.DetailsChild -> DetailsScreenView(
                 component = child.component,
                 onFavoriteAction = { hymn -> println("clicked on favorite for $hymn").let { true } }
             )

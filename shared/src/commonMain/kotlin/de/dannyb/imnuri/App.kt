@@ -28,7 +28,9 @@ private fun showHymnsScreen(api: Api) {
 
     val component = DefaultRootComponent(componentContext, api)
 
-    Surface(color = MaterialTheme.colors.background) {
-        RootContent(component = component, modifier = Modifier.fillMaxSize())
+    MyApplicationTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            RootContent(component = component, modifier = Modifier.fillMaxSize())
+        }
     }
 }

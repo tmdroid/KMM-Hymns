@@ -3,12 +3,12 @@ package de.dannyb.imnuri.ui.common.components
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -19,9 +19,9 @@ fun Toolbar(
 ) {
     TopAppBar(
         title = { Text(text = title) },
-        backgroundColor = Color.White,
+        backgroundColor = MaterialTheme.colors.background,
         navigationIcon = {
-            if(onNavigateBack != null) {
+            if (onNavigateBack != null) {
                 IconButton(
                     onClick = { onNavigateBack.invoke() }
                 ) {

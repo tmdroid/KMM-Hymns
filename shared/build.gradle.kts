@@ -7,6 +7,7 @@ plugins {
 }
 
 val ktorVersion = "2.2.4"
+val decomposeVersion = "2.0.0-compose-experimental-alpha-02"
 
 kotlin {
     android()
@@ -24,6 +25,12 @@ kotlin {
         framework {
             baseName = "shared"
             isStatic = true
+
+            export("com.arkivanov.decompose:decompose:$decomposeVersion")
+            export("com.arkivanov.essenty:lifecycle:$decomposeVersion")
+
+            export("com.arkivanov.essenty:state-keeper:$decomposeVersion")
+            export("com.arkivanov.parcelize.darwin:runtime:$decomposeVersion")
         }
         extraSpecAttributes["resources"] =
             "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
@@ -40,6 +47,10 @@ kotlin {
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
+                // Decompose
+                implementation("com.arkivanov.decompose:decompose:$decomposeVersion")
+                implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$decomposeVersion")
+
                 // Ktor
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -48,10 +59,12 @@ kotlin {
             }
         }
         val androidMain by getting {
+            apply(plugin = "kotlin-parcelize")
+
             dependencies {
                 api("androidx.activity:activity-compose:1.7.1")
                 api("androidx.appcompat:appcompat:1.6.1")
-                api("androidx.core:core-ktx:1.10.0")
+                api("androidx.core:core-ktx:1.10.1")
 
                 implementation("io.ktor:ktor-client-android:$ktorVersion")
             }

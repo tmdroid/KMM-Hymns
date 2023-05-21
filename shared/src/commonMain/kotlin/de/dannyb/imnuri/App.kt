@@ -1,48 +1,34 @@
 package de.dannyb.imnuri
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.arkivanov.decompose.DefaultComponentContext
+import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import de.dannyb.imnuri.networking.Api
-import de.dannyb.imnuri.ui.screens.details.DetailsScreen
-import de.dannyb.imnuri.ui.screens.home.HomeScreen
-import de.dannyb.imnuri.util.CurrentScreenState
+import de.dannyb.imnuri.ui.screens.DefaultRootComponent
+import de.dannyb.imnuri.ui.screens.RootContent
 
 @Composable
 fun App() {
-    MaterialTheme {
-        val api by remember { mutableStateOf(Api()) }
-        var screenState: CurrentScreenState by remember { mutableStateOf(CurrentScreenState.Home) }
+    val api by remember { mutableStateOf(Api()) }
 
-        navigateToCorrectScreen(api, screenState) {
-            screenState = it
-        }
-    }
+    showHymnsScreen(api)
 }
 
 @Composable
-fun navigateToCorrectScreen(
-    api: Api,
-    screenState: CurrentScreenState,
-    onNavigate: (CurrentScreenState) -> Unit
-) {
-    when (screenState) {
-        is CurrentScreenState.Loading -> {
-            onNavigate.invoke(CurrentScreenState.Home)
-        }
+private fun showHymnsScreen(api: Api) {
+    val lifecycle by remember { mutableStateOf(LifecycleRegistry()) }
+    val componentContext by remember { mutableStateOf(DefaultComponentContext(lifecycle)) }
 
-        is CurrentScreenState.Home -> HomeScreen(api) {
-            onNavigate.invoke(CurrentScreenState.Details(it))
-        }
+    val component = DefaultRootComponent(componentContext, api)
 
-        is CurrentScreenState.Details -> {
-            val hymn = screenState.hymn
-            DetailsScreen(hymn) { onNavigate.invoke(CurrentScreenState.Home) }
-        }
-
-        is CurrentScreenState.Settings -> println("Settings")
+    Surface(color = MaterialTheme.colors.background) {
+        RootContent(component = component, modifier = Modifier.fillMaxSize())
     }
 }

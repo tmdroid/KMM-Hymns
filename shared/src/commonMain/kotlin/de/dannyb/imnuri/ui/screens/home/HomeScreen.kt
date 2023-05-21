@@ -13,44 +13,64 @@ import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import de.dannyb.imnuri.networking.Api
+import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import com.arkivanov.decompose.value.MutableValue
+import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.update
 import de.dannyb.imnuri.model.Hymn
+import de.dannyb.imnuri.networking.Api
 import de.dannyb.imnuri.ui.common.components.Toolbar
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-@Composable
-fun HomeScreen(
-    api: Api,
-    onHymnSelected: (Hymn) -> Unit
-) = Column(Modifier.fillMaxSize()) {
-    Toolbar()
-    HymnsList(api, onHymnSelected)
+interface HymnsListComponent {
+    val hymns: Value<List<Hymn>>
+    fun onHymnClicked(hymn: Hymn)
 }
 
-@Composable
-fun HymnsList(api: Api, onHymnSelected: (Hymn) -> Unit) {
-    var hymns by remember { mutableStateOf<List<Hymn>>(emptyList()) }
+class DefaultHymnsListComponent(
+    componentContext: ComponentContext,
+    api: Api,
+    private val onHymnSelected: (Hymn) -> Unit
+) : HymnsListComponent, ComponentContext by componentContext {
 
-    if(hymns.isEmpty()) {
-        LaunchedEffect(true) {
-            try {
-                hymns = api.downloadHymns()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    private var _hymns = MutableValue(emptyList<Hymn>())
+
+    override val hymns: Value<List<Hymn>> get() = _hymns
+
+    init {
+        GlobalScope.launch {
+            val hymns = api.downloadHymns()
+            _hymns.update { hymns }
         }
     }
 
+    override fun onHymnClicked(hymn: Hymn) {
+        onHymnSelected.invoke(hymn)
+    }
+}
+
+@Composable
+fun HomeScreen(
+    component: HymnsListComponent,
+    onHymnSelected: (Hymn) -> Unit
+) = Column(Modifier.fillMaxSize()) {
+    Toolbar()
+    HymnsList(component, onHymnSelected)
+}
+
+@Composable
+fun HymnsList(component: HymnsListComponent, onHymnSelected: (Hymn) -> Unit) {
+    val state by component.hymns.subscribeAsState()
+
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-        itemsIndexed(hymns) { index, item ->
+        itemsIndexed(state) { index, item ->
             ImnElement(index, item, onHymnSelected)
         }
     }

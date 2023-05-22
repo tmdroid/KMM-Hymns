@@ -78,7 +78,6 @@ class DefaultRootComponent(
         DefaultDetailsScreenCtrl(
             componentContext = componentContext,
             hymn = config.hymn,
-            onFavoriteAction = { true },
             onBackAction = { navigation.pop() }
         )
 
@@ -107,7 +106,6 @@ fun RootContent(component: RootComponent, modifier: Modifier) {
 
             is RootComponent.Child.DetailsChild -> DetailsScreenView(
                 component = child.component,
-                onFavoriteAction = { hymn -> println("clicked on favorite for $hymn").let { true } }
             )
         }
     }

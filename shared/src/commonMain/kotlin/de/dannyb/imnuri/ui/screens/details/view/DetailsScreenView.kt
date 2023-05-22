@@ -18,16 +18,15 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import de.dannyb.imnuri.model.Hymn
 import de.dannyb.imnuri.ui.common.components.Toolbar
 import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
@@ -36,17 +35,17 @@ import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
 @Composable
 fun DetailsScreenView(
     component: DetailsScreenCtrl,
-    onFavoriteAction: (Hymn) -> Boolean,
 ) = Column(Modifier.fillMaxSize()) {
+    val state = component.state.subscribeAsState()
 
-    var isFavorite by remember { mutableStateOf(false) }
-
-    DetailsToolbar(component, isFavorite, onFavoriteAction)
-    ShowZoomableHymn(component)
+    with(state.value) {
+        DetailsToolbar(hymn, isFavorite, onBackAction, onFavoriteAction)
+        ShowZoomableHymn(hymn)
+    }
 }
 
 @Composable
-fun ShowZoomableHymn(component: DetailsScreenCtrl) {
+fun ShowZoomableHymn(hymn: Hymn) {
     val fontSize = remember { mutableStateOf(30f) }
 
     val zoomableModifier = Modifier.pointerInput(Unit) {
@@ -61,21 +60,19 @@ fun ShowZoomableHymn(component: DetailsScreenCtrl) {
             .then(zoomableModifier),
         contentAlignment = Alignment.TopCenter
     ) {
-        ScrollableColumn(component, fontSize)
+        ScrollableColumn(hymn, fontSize)
     }
 }
 
 @Composable
 fun ScrollableColumn(
-    component: DetailsScreenCtrl,
+    hymn: Hymn,
     fontSize: MutableState<Float>,
 ) {
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(scrollState),
+        modifier = Modifier.fillMaxWidth().verticalScroll(scrollState),
         verticalArrangement = Arrangement.Center
     ) {
 
@@ -83,7 +80,7 @@ fun ScrollableColumn(
 
         Text(
             modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
-            text = component.hymn.stanzas.joinToString("\n\n"),
+            text = hymn.stanzas.joinToString("\n\n"),
             fontSize = fontSize.value.sp,
             textAlign = TextAlign.Center,
         )
@@ -94,22 +91,20 @@ fun ScrollableColumn(
 
 @Composable
 private fun DetailsToolbar(
-    component: DetailsScreenCtrl,
+    hymn: Hymn,
     isFavorite: Boolean,
-    onFavoriteAction: (Hymn) -> Boolean
+    onBackAction: () -> Unit,
+    onFavoriteAction: () -> Unit
 ) {
-    var isFavorite1 = isFavorite
-
     Toolbar(
-        title = component.hymn.title,
-        onNavigateBack = { component.onBackClicked() },
+        title = hymn.title,
+        onNavigateBack = onBackAction,
         rightIcons = {
             IconButton(onClick = {
-                isFavorite1 = !isFavorite1
-                onFavoriteAction.invoke(component.hymn)
+                onFavoriteAction.invoke()
             }) {
                 Icon(
-                    imageVector = if (isFavorite1) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                    imageVector = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                     contentDescription = "Favorites",
                 )
             }

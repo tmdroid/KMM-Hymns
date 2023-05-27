@@ -11,7 +11,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,20 +28,34 @@ import de.dannyb.imnuri.ui.screens.list.ctrl.HymnsListCtrl
 
 
 @Composable
-fun HymnsListScreenView(
-    ctrl: HymnsListCtrl,
-    onHymnSelected: (Hymn) -> Unit
-) = Column(Modifier.fillMaxSize()) {
-    Toolbar()
-    HymnsList(ctrl, onHymnSelected)
+fun HymnsListScreenView(ctrl: HymnsListCtrl) = Column(Modifier.fillMaxSize()) {
+    val state by ctrl.state.subscribeAsState()
+
+    with(state) {
+        SearchableToolbar(title, onSearchIconSelectedAction)
+        HymnsList(hymns, onHymnSelectedAction)
+    }
 }
 
 @Composable
-fun HymnsList(ctrl: HymnsListCtrl, onHymnSelected: (Hymn) -> Unit) {
-    val state by ctrl.hymns.subscribeAsState()
+private fun SearchableToolbar(title: String, onSearchIconSelectedAction: () -> Unit) {
+    Toolbar(
+        title = title,
+        rightIcons = {
 
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = "Search",
+                modifier = Modifier.clickable { onSearchIconSelectedAction.invoke() }
+            )
+        },
+    )
+}
+
+@Composable
+fun HymnsList(hymns: List<Hymn>, onHymnSelected: (Hymn) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-        itemsIndexed(state) { index, item ->
+        itemsIndexed(hymns) { index, item ->
             ImnElement(index, item, onHymnSelected)
         }
     }
@@ -56,7 +73,7 @@ fun ImnElement(index: Int, item: Hymn, onHymnSelected: (Hymn) -> Unit) {
     Card(modifier = Modifier
         .fillMaxWidth()
         .height(35.dp)
-        .clickable { onHymnSelected(item) }
+        .clickable { onHymnSelected.invoke(item) }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -64,7 +81,7 @@ fun ImnElement(index: Int, item: Hymn, onHymnSelected: (Hymn) -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                modifier = Modifier.padding(start = 30.dp),
+                modifier = Modifier.padding(start = 24.dp),
                 text = content,
             )
         }

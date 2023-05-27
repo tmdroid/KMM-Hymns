@@ -16,7 +16,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import de.dannyb.imnuri.model.Hymn
-import de.dannyb.imnuri.networking.Api
+import de.dannyb.imnuri.networking.HymnsApi
 import de.dannyb.imnuri.ui.screens.details.ctrl.DefaultDetailsScreenCtrl
 import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
 import de.dannyb.imnuri.ui.screens.details.view.DetailsScreenView
@@ -30,14 +30,14 @@ interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
 
     sealed class Child {
-        class ListChild(val component: HymnsListCtrl) : Child()
-        class DetailsChild(val component: DetailsScreenCtrl) : Child()
+        class ListChild(val ctrl: HymnsListCtrl) : Child()
+        class DetailsChild(val ctrl: DetailsScreenCtrl) : Child()
     }
 }
 
 class DefaultRootComponent(
     componentContext: ComponentContext,
-    private val api: Api
+    private val api: HymnsApi
 ) : RootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
@@ -57,9 +57,9 @@ class DefaultRootComponent(
         componentContext: ComponentContext
     ): RootComponent.Child {
         return when (config) {
-            is Config.List -> RootComponent.Child.ListChild(component = itemList(componentContext))
+            is Config.List -> RootComponent.Child.ListChild(ctrl = itemList(componentContext))
             is Config.Details -> RootComponent.Child.DetailsChild(
-                component = itemDetails(componentContext, config)
+                ctrl = itemDetails(componentContext, config)
             )
         }
     }
@@ -68,7 +68,7 @@ class DefaultRootComponent(
         DefaultHymnsListCtrl(
             componentContext = componentContext,
             api = api,
-            onHymnSelected = { navigation.push(Config.Details(hymn = it)) }
+            onHymnSelectedAction = { navigation.push(Config.Details(hymn = it)) }
         )
 
     private fun itemDetails(
@@ -100,12 +100,11 @@ fun RootContent(component: RootComponent, modifier: Modifier) {
     ) {
         when (val child = it.instance) {
             is RootComponent.Child.ListChild -> HymnsListScreenView(
-                ctrl = child.component,
-                onHymnSelected = { hymn -> child.component.onHymnClicked(hymn) }
+                ctrl = child.ctrl,
             )
 
             is RootComponent.Child.DetailsChild -> DetailsScreenView(
-                component = child.component,
+                ctrl = child.ctrl,
             )
         }
     }

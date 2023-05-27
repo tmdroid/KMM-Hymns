@@ -5,34 +5,70 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import de.dannyb.imnuri.model.Hymn
-import de.dannyb.imnuri.networking.Api
+import de.dannyb.imnuri.networking.HymnsApi
+import de.dannyb.imnuri.ui.common.components.SearchConfig
+import de.dannyb.imnuri.ui.screens.details.ctrl.ScreenCtrl
+import de.dannyb.imnuri.ui.screens.list.state.HymnsListScreenState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-interface HymnsListCtrl {
-    val hymns: Value<List<Hymn>>
-    fun onHymnClicked(hymn: Hymn)
-}
+interface HymnsListCtrl : ScreenCtrl<HymnsListScreenState>
 
 class DefaultHymnsListCtrl(
     componentContext: ComponentContext,
-    api: Api,
-    private val onHymnSelected: (Hymn) -> Unit
+    api: HymnsApi,
+    onHymnSelectedAction: (Hymn) -> Unit
 ) : HymnsListCtrl, ComponentContext by componentContext {
 
-    private var _hymns = MutableValue(emptyList<Hymn>())
+    private var searchConfig: SearchConfig? = null
+    private var searchText: String = ""
 
-    override val hymns: Value<List<Hymn>> get() = _hymns
+    private val _state = MutableValue(
+        HymnsListScreenState(
+            title = "Imnuri AZS-MR",
+            hymns = emptyList(),
+            searchConfig = null,
+            onHymnSelectedAction = onHymnSelectedAction,
+            onSearchIconSelectedAction = ::onSearchSelected,
+        )
+    )
+
+    override val state: Value<HymnsListScreenState>
+        get() = _state
 
     init {
         GlobalScope.launch {
             val hymns = api.downloadHymns()
-            _hymns.update { hymns }
+            _state.update { it.copy(hymns = hymns) }
         }
     }
 
-    override fun onHymnClicked(hymn: Hymn) {
-        onHymnSelected.invoke(hymn)
+    private fun onSearchSelected() {
+        fun updateState() {
+            _state.update { it.copy(searchConfig = searchConfig) }
+        }
+
+        searchConfig = SearchConfig(
+            value = searchText,
+            onCharacterTypedAction = {
+                updateSearchConfig(it)
+                updateState()
+            },
+            onClearAction = {
+                updateSearchConfig("")
+                updateState()
+            },
+            onCloseSearchAction = {
+                searchConfig = null
+                updateState()
+            }
+        )
+
+        _state.update { it.copy(searchConfig = searchConfig) }
+    }
+
+    private fun updateSearchConfig(text: String? = null) {
+        searchConfig = if (text == null) null else searchConfig?.copy(value = text)
     }
 }

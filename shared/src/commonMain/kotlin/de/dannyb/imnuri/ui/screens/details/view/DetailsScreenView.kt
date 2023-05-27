@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,12 +34,10 @@ import de.dannyb.imnuri.ui.screens.details.ctrl.DetailsScreenCtrl
 
 
 @Composable
-fun DetailsScreenView(
-    component: DetailsScreenCtrl,
-) = Column(Modifier.fillMaxSize()) {
-    val state = component.state.subscribeAsState()
+fun DetailsScreenView(ctrl: DetailsScreenCtrl) = Column(Modifier.fillMaxSize()) {
+    val state by ctrl.state.subscribeAsState()
 
-    with(state.value) {
+    with(state) {
         DetailsToolbar(hymn, isFavorite, onBackAction, onFavoriteAction)
         ShowZoomableHymn(hymn)
     }

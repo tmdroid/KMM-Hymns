@@ -1,8 +1,11 @@
 package de.dannyb.imnuri.ui.common.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.ContentAlpha
@@ -18,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,6 +41,7 @@ data class SearchConfig(
 fun Toolbar(
     title: String = "Imnuri AZS-MR",
     onNavigateBack: (() -> Unit)? = null,
+    onSettingsIconAction: (() -> Unit)? = null,
     rightIcons: @Composable (RowScope.() -> Unit)? = null,
     searchConfig: SearchConfig? = null,
 ) {
@@ -44,6 +49,7 @@ fun Toolbar(
         TitleAppBar(
             title = title,
             onNavigateBack = onNavigateBack,
+            onSettingsIconAction = onSettingsIconAction,
             rightIcons = rightIcons
         )
     } else {
@@ -59,6 +65,7 @@ fun Toolbar(
 private fun TitleAppBar(
     title: String,
     onNavigateBack: (() -> Unit)?,
+    onSettingsIconAction: (() -> Unit)?,
     rightIcons: @Composable (RowScope.() -> Unit)?,
 ) {
     TopAppBar(
@@ -72,6 +79,16 @@ private fun TitleAppBar(
         elevation = 8.dp,
         actions = {
             rightIcons?.invoke(this)
+
+            if(onSettingsIconAction != null) {
+                Spacer(modifier = Modifier.width(width = 8.dp))
+
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = "Settings",
+                    modifier = Modifier.clickable(onClick = onSettingsIconAction)
+                )
+            }
         },
     )
 }

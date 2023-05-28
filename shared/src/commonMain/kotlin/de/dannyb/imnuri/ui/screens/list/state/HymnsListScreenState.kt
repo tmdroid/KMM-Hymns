@@ -9,6 +9,7 @@ data class HymnsListScreenState(
     val title: String,
     val hymns: Value<List<Hymn>>,
     val onHymnSelectedAction: (Hymn) -> Unit,
-    val onSearchIconSelectedAction: () -> Unit,
+    val onSearchIconAction: () -> Unit,
+    val onSettingsIconAction: () -> Unit,
     val searchConfig: SearchConfig? = null
 ): ScreenStateModel

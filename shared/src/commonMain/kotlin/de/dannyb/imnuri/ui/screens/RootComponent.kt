@@ -23,6 +23,9 @@ import de.dannyb.imnuri.ui.screens.details.view.DetailsScreenView
 import de.dannyb.imnuri.ui.screens.list.ctrl.DefaultHymnsListCtrl
 import de.dannyb.imnuri.ui.screens.list.ctrl.HymnsListCtrl
 import de.dannyb.imnuri.ui.screens.list.view.HymnsListScreenView
+import de.dannyb.imnuri.ui.screens.settings.ctrl.DefaultSettingsScreenCtrl
+import de.dannyb.imnuri.ui.screens.settings.ctrl.SettingsScreenCtrl
+import de.dannyb.imnuri.ui.screens.settings.view.SettingsScreenView
 
 
 interface RootComponent {
@@ -32,6 +35,7 @@ interface RootComponent {
     sealed class Child {
         class ListChild(val ctrl: HymnsListCtrl) : Child()
         class DetailsChild(val ctrl: DetailsScreenCtrl) : Child()
+        class SettingsChild(val ctrl: SettingsScreenCtrl) : Child()
     }
 }
 
@@ -58,6 +62,10 @@ class DefaultRootComponent(
     ): RootComponent.Child {
         return when (config) {
             is Config.List -> RootComponent.Child.ListChild(ctrl = itemList(componentContext))
+            is Config.Settings -> RootComponent.Child.SettingsChild(
+                ctrl = itemSettings(componentContext)
+            )
+
             is Config.Details -> RootComponent.Child.DetailsChild(
                 ctrl = itemDetails(componentContext, config)
             )
@@ -68,22 +76,32 @@ class DefaultRootComponent(
         DefaultHymnsListCtrl(
             componentContext = componentContext,
             api = api,
-            onHymnSelectedAction = { navigation.push(Config.Details(hymn = it)) }
+            onHymnSelectedAction = { navigation.push(Config.Details(hymn = it)) },
+            onSettingsIconAction = { navigation.push(Config.Settings) }
         )
 
     private fun itemDetails(
         componentContext: ComponentContext,
         config: Config.Details
-    ): DetailsScreenCtrl =
-        DefaultDetailsScreenCtrl(
-            componentContext = componentContext,
-            hymn = config.hymn,
-            onBackAction = { navigation.pop() }
-        )
+    ): DetailsScreenCtrl = DefaultDetailsScreenCtrl(
+        componentContext = componentContext,
+        hymn = config.hymn,
+        onBackAction = { navigation.pop() }
+    )
+
+    private fun itemSettings(
+        componentContext: ComponentContext
+    ): SettingsScreenCtrl = DefaultSettingsScreenCtrl(
+        componentContext = componentContext,
+        onBackAction = { navigation.pop() }
+    )
 
     private sealed interface Config : Parcelable {
         @Parcelize
         object List : Config
+
+        @Parcelize
+        object Settings : Config
 
         @Parcelize
         data class Details(val hymn: Hymn) : Config
@@ -105,6 +123,10 @@ fun RootContent(component: RootComponent, modifier: Modifier) {
 
             is RootComponent.Child.DetailsChild -> DetailsScreenView(
                 ctrl = child.ctrl,
+            )
+
+            is RootComponent.Child.SettingsChild -> SettingsScreenView(
+                ctrl = child.ctrl
             )
         }
     }

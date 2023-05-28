@@ -18,7 +18,8 @@ interface HymnsListCtrl : ScreenCtrl<HymnsListScreenState>
 class DefaultHymnsListCtrl(
     componentContext: ComponentContext,
     api: HymnsApi,
-    onHymnSelectedAction: (Hymn) -> Unit
+    onHymnSelectedAction: (Hymn) -> Unit,
+    onSettingsIconAction: () -> Unit,
 ) : HymnsListCtrl, ComponentContext by componentContext {
 
     private var searchText = MutableValue("")
@@ -41,7 +42,8 @@ class DefaultHymnsListCtrl(
             hymns = searchedHymns,
             searchConfig = null,
             onHymnSelectedAction = onHymnSelectedAction,
-            onSearchIconSelectedAction = ::onSearchSelected,
+            onSettingsIconAction = onSettingsIconAction,
+            onSearchIconAction = ::onSearchSelected,
         )
     )
 

@@ -34,7 +34,7 @@ fun HymnsListScreenView(ctrl: HymnsListCtrl) = Column(Modifier.fillMaxSize()) {
     val state by ctrl.state.subscribeAsState()
 
     with(state) {
-        SearchableToolbar(title, searchConfig, onSearchIconSelectedAction)
+        SearchableToolbar(title, searchConfig, onSearchIconAction, onSettingsIconAction)
         HymnsList(hymns, onHymnSelectedAction)
     }
 }
@@ -43,16 +43,18 @@ fun HymnsListScreenView(ctrl: HymnsListCtrl) = Column(Modifier.fillMaxSize()) {
 private fun SearchableToolbar(
     title: String,
     searchConfig: SearchConfig?,
-    onSearchIconSelectedAction: () -> Unit,
+    onSearchIconAction: () -> Unit,
+    onSettingsIconAction: () -> Unit
 ) {
     Toolbar(
         title = title,
         searchConfig = searchConfig,
+        onSettingsIconAction = onSettingsIconAction,
         rightIcons = {
             Icon(
                 imageVector = Icons.Filled.Search,
                 contentDescription = "Search",
-                modifier = Modifier.clickable(onClick = onSearchIconSelectedAction)
+                modifier = Modifier.clickable(onClick = onSearchIconAction)
             )
         },
     )

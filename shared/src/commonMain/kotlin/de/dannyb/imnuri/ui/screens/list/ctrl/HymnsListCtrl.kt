@@ -21,54 +21,83 @@ class DefaultHymnsListCtrl(
     onHymnSelectedAction: (Hymn) -> Unit
 ) : HymnsListCtrl, ComponentContext by componentContext {
 
-    private var searchConfig: SearchConfig? = null
-    private var searchText: String = ""
+    private var searchText = MutableValue("")
+    private val allHymns = MutableValue(emptyList<Hymn>())
+
+    private val searchedHymns = allHymns.filterByValue(searchText) { hymns, text ->
+        if (text.isEmpty()) allHymns.value else {
+            val asNumber = text.toIntOrNull()
+            val filterer: (Hymn) -> Boolean = if (asNumber != null) {
+                { hymn -> hymn.number.toString().startsWith(text) }
+            } else { hymn -> hymn.title.contains(text) }
+
+            allHymns.value.filter(filterer)
+        }
+    }
 
     private val _state = MutableValue(
         HymnsListScreenState(
             title = "Imnuri AZS-MR",
-            hymns = emptyList(),
+            hymns = searchedHymns,
             searchConfig = null,
             onHymnSelectedAction = onHymnSelectedAction,
             onSearchIconSelectedAction = ::onSearchSelected,
         )
     )
 
-    override val state: Value<HymnsListScreenState>
-        get() = _state
+    override val state: Value<HymnsListScreenState> get() = _state
 
     init {
         GlobalScope.launch {
             val hymns = api.downloadHymns()
-            _state.update { it.copy(hymns = hymns) }
+            allHymns.update { hymns }
         }
     }
 
     private fun onSearchSelected() {
-        fun updateState() {
-            _state.update { it.copy(searchConfig = searchConfig) }
-        }
-
-        searchConfig = SearchConfig(
-            value = searchText,
-            onCharacterTypedAction = {
-                updateSearchConfig(it)
-                updateState()
+        val searchConfig = SearchConfig(
+            value = searchText.value,
+            onCharacterTypedAction = { text ->
+                searchText.update { text }
+                updateScreenState { copy(searchConfig = searchConfig?.copy(value = text)) }
             },
             onClearAction = {
-                updateSearchConfig("")
-                updateState()
+                updateScreenState { copy(searchConfig = searchConfig?.copy(value = "")) }
             },
-            onCloseSearchAction = {
-                searchConfig = null
-                updateState()
+            onCloseAction = {
+                updateScreenState { copy(searchConfig = null) }
             }
         )
 
-        _state.update { it.copy(searchConfig = searchConfig) }
+        updateScreenState { copy(searchConfig = searchConfig) }
     }
 
-    private fun updateSearchConfig(text: String? = null) {
-        searchConfig = if (text == null) null else searchConfig?.copy(value = text)
+    private fun updateScreenState(cb: HymnsListScreenState.() -> HymnsListScreenState) {
+        _state.update(cb)
     }
+}
+
+private fun <LEFT : Any, RIGHT : Any> Value<List<LEFT>>.filterByValue(
+    value: Value<RIGHT>,
+    combiner: (List<LEFT>, RIGHT) -> List<LEFT>
+): Value<List<LEFT>> {
+    var left: List<LEFT> = this.value
+    var right: RIGHT = value.value
+    val out = MutableValue(left)
+
+    fun update() {
+        out.update { combiner.invoke(left, right) }
+    }
+
+    subscribe {
+        left = it
+        update()
+    }
+
+    value.subscribe {
+        right = it
+        update()
+    }
+
+    return out
 }

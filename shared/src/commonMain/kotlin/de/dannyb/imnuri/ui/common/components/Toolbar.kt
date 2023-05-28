@@ -30,7 +30,7 @@ data class SearchConfig(
     val value: String,
     val onCharacterTypedAction: (String) -> Unit,
     val onClearAction: () -> Unit,
-    val onCloseSearchAction: () -> Unit,
+    val onCloseAction: () -> Unit,
 )
 
 @Composable
@@ -50,7 +50,7 @@ fun Toolbar(
         SearchAppBar(
             text = searchConfig.value,
             onTextChange = searchConfig.onCharacterTypedAction,
-            onCloseClicked = searchConfig.onCloseSearchAction,
+            onCloseClicked = searchConfig.onCloseAction,
         )
     }
 }
